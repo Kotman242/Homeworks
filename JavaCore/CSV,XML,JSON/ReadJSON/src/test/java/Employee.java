@@ -16,5 +16,8 @@ public class Employee {
         this.country = country;
         this.age = age;
     }
-
+    //Employee{id=1, firstName='John', lastName='Smith', country='USA', age=25}
+    public String toString(){
+        return "Employee{id="+id+", firstName="+firstName+", lastName="+lastName+", country="+country+", age="+age+"}";
+    }
 }

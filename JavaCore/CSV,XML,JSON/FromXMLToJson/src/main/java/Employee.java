@@ -1,3 +1,5 @@
+import org.w3c.dom.Node;
+
 public class Employee {
     public long id;
     public String firstName;
@@ -16,5 +18,4 @@ public class Employee {
         this.country = country;
         this.age = age;
     }
-
 }
