@@ -10,35 +10,66 @@ import ru.netology.patient.service.alert.SendAlertService;
 import ru.netology.patient.service.medical.MedicalServiceImpl;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.stream.Stream;
 
 public class MedicalServiceTest {
-    @MethodSource("methodSource")
+    @MethodSource("methodSource2")
     @ParameterizedTest
-    public void checkTemperatureTest(String id, BigDecimal temperature, int number, PatientInfo patientInfo){
+    public void checkTemperatureTest(String id, BigDecimal temperature, int number) {
         PatientInfoRepository patientInfoRepository = Mockito.mock(PatientInfoRepository.class);
+        PatientInfo patientInfo = Mockito.spy(PatientInfo.class);
+        HealthInfo healthInfo = Mockito.spy(HealthInfo.class);
         SendAlertService sendAlertService = Mockito.mock(SendAlertService.class);
         Mockito.when(patientInfoRepository.getById(id))
                 .thenReturn(patientInfo);
+        Mockito.when(patientInfo.getHealthInfo())
+                .thenReturn(healthInfo);
+        Mockito.when(healthInfo.getNormalTemperature())
+                .thenReturn(new BigDecimal("36.6"));
+        Mockito.when(patientInfo.getId()).
+                thenReturn(id);
         MedicalServiceImpl medicalService = new MedicalServiceImpl(patientInfoRepository, sendAlertService);
-        medicalService.checkTemperature(id,temperature);
+        medicalService.checkTemperature(id, temperature);
 
-        Mockito.verify(sendAlertService, Mockito.times(number)).send(Mockito.anyString());
+        Mockito.verify(sendAlertService, Mockito.times(number)).send(String.format("Warning, patient with id: %s, need help", patientInfo.getId()));
 
+    }
+
+    @MethodSource("methodSource")
+    @ParameterizedTest
+    public void checkBloodPressureTest(String id, BloodPressure bloodPressure, int number) {
+        BloodPressure bloodPressure1 = new BloodPressure(120, 80);
+        PatientInfoRepository patientInfoRepository = Mockito.mock(PatientInfoRepository.class);
+        PatientInfo patientInfo = Mockito.spy(PatientInfo.class);
+        HealthInfo healthInfo = Mockito.spy(HealthInfo.class);
+        SendAlertService sendAlertService = Mockito.mock(SendAlertService.class);
+        Mockito.when(patientInfoRepository.getById(id))
+                .thenReturn(patientInfo);
+        Mockito.when(patientInfo.getHealthInfo())
+                .thenReturn(healthInfo);
+        Mockito.when(healthInfo.getBloodPressure())
+                .thenReturn(bloodPressure1);
+        Mockito.when(patientInfo.getId())
+                .thenReturn(id);
+        MedicalServiceImpl medicalService = new MedicalServiceImpl(patientInfoRepository, sendAlertService);
+
+        medicalService.checkBloodPressure(id, bloodPressure);
+
+
+        Mockito.verify(sendAlertService, Mockito.times(number)).send(String.format("Warning, patient with id: %s, need help", patientInfo.getId()));
     }
 
 
     public static Stream<Arguments> methodSource() {
-        return Stream.of(Arguments.of(Arguments.of("id1",new BigDecimal("38.0"), 1,
-                new PatientInfo("Семен", "Михайлов", LocalDate.of(1982, 1, 16),
-                new HealthInfo(new BigDecimal("36.6"), new BloodPressure(125, 78))))),
-                Arguments.of("id1",new BigDecimal("36.6"), 0,
-                        new PatientInfo("Семен", "Михайлов", LocalDate.of(1982, 1, 16),
-                        new HealthInfo(new BigDecimal("36.6"), new BloodPressure(125, 78))
-                ))
+        return Stream.of(Arguments.of("id1", new BloodPressure(200, 140), 1),
+                Arguments.of("id1", new BloodPressure(120, 80), 0));
+    }
+
+    public static Stream<Arguments> methodSource2() {
+        return Stream.of(Arguments.of("id1", new BigDecimal("35.0"), 1),
+                Arguments.of("id1", new BigDecimal("36.8"), 0)
         );
     }
-}/*Arguments.of("id1",new BigDecimal("36.6"), 0,new PatientInfo("Семен", "Михайлов", LocalDate.of(1982, 1, 16),
-                new HealthInfo(new BigDecimal("36.6"), new BloodPressure(125, 78))
-                )), */
+}
+
+
