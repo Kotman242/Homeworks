@@ -1,3 +1,6 @@
+package ru.netology.geo;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -17,14 +20,14 @@ public class GeoServiceImplTest {
     public void byIpTest(String ip, Location expected) {
         GeoServiceImpl geoService = new GeoServiceImpl();
         Location result = geoService.byIp(ip);
-        assertEquals(expected,result);
+        Assertions.assertEquals(expected,result);
     }
 
     @Test
     public void byCoordinatesTest(){
         double latitude = 3.11, longitude = 1.54;
         GeoServiceImpl geoService = new GeoServiceImpl();
-        assertThrows(RuntimeException.class,()-> {
+        Assertions.assertThrows(RuntimeException.class,()-> {
             geoService.byCoordinates(latitude,longitude);
         });
     }
