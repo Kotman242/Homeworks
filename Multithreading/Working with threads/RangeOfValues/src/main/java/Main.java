@@ -1,10 +1,12 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 public class Main {
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
         String[] texts = new String[25];
         for (int i = 0; i < texts.length; i++) {
             texts[i] = generateText("aab", 30_000);
@@ -12,12 +14,12 @@ public class Main {
 
         long startTs = System.currentTimeMillis(); // start time
 
-        List<Thread> threads = new ArrayList<>();
+        List<FutureTask<String>> threads = new ArrayList<>();
 
         for (int q = 0; q < texts.length; q++) {
             int finalQ = q;
 
-            threads.add(new Thread(() -> {
+            threads.add(new FutureTask<>(() -> {
                 String text = texts[finalQ];
                 int maxSize = 0;
                 for (int i = 0; i < text.length(); i++) {
@@ -37,14 +39,26 @@ public class Main {
                         }
                     }
                 }
-                System.out.println(text.substring(0, 100) + " -> " + maxSize);
+                return text.substring(0, 100) + " -> " + maxSize;
             }));
-            threads.get(q).start();
+            new Thread(threads.get(q)).start();
         }
 
-        for (Thread thread : threads) {
-            thread.join();
+        int maxResult = 0;
+        String result = null;
+        String value;
+        int resultValue;
+
+        for (FutureTask futureTask : threads) {
+            value = (String) futureTask.get();
+            resultValue = Integer.parseInt(value.substring(value.length() - 2));
+            if (resultValue > maxResult) {
+                maxResult = resultValue;
+                result = value;
+            }
         }
+
+        System.out.println(result);
 
         long endTs = System.currentTimeMillis(); // end time
 
